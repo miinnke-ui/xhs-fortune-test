@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>测测你未来3个月的幸运数字💫</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Segoe UI',Roboto,sans-serif;background:#0a0a1a;color:#fff;min-height:100vh;overflow-x:hidden}
+        .stars{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0}
+        .star{position:absolute;background:#fff;border-radius:50%;animation:twinkle var(--dur) ease-in-out infinite}
+        @keyframes twinkle{0%,100%{opacity:.2}50%{opacity:1}}
+
+        .container{position:relative;z-index:1;max-width:420px;margin:0 auto;padding:20px;min-height:100vh}
+
+        /* ===== 首页 ===== */
+        .start-page{text-align:center;padding-top:50px;animation:fadeIn .8s ease}
+        .start-page .main-emoji{font-size:90px;margin-bottom:16px;animation:float 3s ease-in-out infinite}
+        @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+        .start-page h1{font-size:26px;margin-bottom:10px;background:linear-gradient(135deg,#ffd700,#ffaa00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+        .start-page .subtitle{color:rgba(255,255,255,.75);font-size:15px;margin-bottom:32px;line-height:1.7}
+        .start-page .subtitle span{color:#ffd700;font-weight:600}
+        .start-page .stats{color:rgba(255,255,255,.5);font-size:13px;margin-bottom:36px}
+        .start-page .stats strong{color:#ffd700}
+        .preview-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:36px;text-align:left}
+        .preview-card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px;backdrop-filter:blur(10px)}
+        .preview-card .pc-icon{font-size:22px;margin-bottom:6px}
+        .preview-card .pc-title{font-size:13px;font-weight:600;color:#ffd700;margin-bottom:3px}
+        .preview-card .pc-desc{font-size:11px;color:rgba(255,255,255,.55);line-height:1.4}
+        .btn-start{background:linear-gradient(135deg,#ffd700,#ffaa00);color:#1a1a2e;border:none;padding:16px 52px;border-radius:50px;font-size:18px;font-weight:700;cursor:pointer;box-shadow:0 8px 30px rgba(255,215,0,.3);transition:all .3s;letter-spacing:1px}
+        .btn-start:active{transform:scale(.96)}
+
+        /* ===== 答题页 ===== */
+        .question-page{display:none;animation:slideIn .5s ease}
+        .progress-bar{background:rgba(255,255,255,.1);border-radius:10px;height:6px;margin-bottom:28px;overflow:hidden}
+        .progress-bar .fill{background:linear-gradient(90deg,#ffd700,#ffaa00);height:100%;border-radius:10px;transition:width .5s ease}
+        .question-num{color:rgba(255,255,255,.5);font-size:13px;margin-bottom:10px}
+        .question-text{font-size:20px;font-weight:600;margin-bottom:28px;line-height:1.6}
+        .question-text .q-emoji{font-size:28px;vertical-align:middle}
+        .options{display:flex;flex-direction:column;gap:12px}
+        .option{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.12);color:#fff;padding:16px 18px;border-radius:14px;font-size:15px;cursor:pointer;transition:all .3s;text-align:left;line-height:1.5;backdrop-filter:blur(5px)}
+        .option:hover,.option:active{background:rgba(255,215,0,.12);border-color:rgba(255,215,0,.4);transform:translateX(4px)}
+        .option.selected{border-color:#ffd700;background:rgba(255,215,0,.15)}
+
+        /* ===== 分析动画页 ===== */
+        .analyzing-page{display:none;text-align:center;padding-top:100px;animation:fadeIn .5s ease}
+        .orb-container{width:120px;height:120px;margin:0 auto 30px;position:relative}
+        .orb{width:120px;height:120px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffd700,#ff8c00,#8b5cf6);animation:orbPulse 2s ease-in-out infinite;box-shadow:0 0 60px rgba(255,215,0,.4)}
+        @keyframes orbPulse{0%,100%{transform:scale(1);box-shadow:0 0 60px rgba(255,215,0,.4)}50%{transform:scale(1.1);box-shadow:0 0 90px rgba(255,215,0,.6)}}
+        .analyzing-page .step-text{font-size:16px;color:rgba(255,255,255,.8);margin-top:10px;min-height:24px}
+        .analyzing-page .step-sub{font-size:13px;color:rgba(255,255,255,.4);margin-top:8px}
+
+        /* ===== 结果页 ===== */
+        .result-page{display:none;animation:fadeIn .8s ease}
+        .result-hero{text-align:center;margin-bottom:20px}
+        .result-hero .lucky-number{font-size:72px;font-weight:900;background:linear-gradient(135deg,#ffd700,#ff8c00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:4px;animation:revealNum 1s ease}
+        @keyframes revealNum{from{opacity:0;transform:scale(.5)}to{opacity:1;transform:scale(1)}}
+        .result-hero .lucky-label{font-size:14px;color:rgba(255,255,255,.5);margin-bottom:12px}
+        .result-hero .lucky-title{font-size:20px;font-weight:600;margin-bottom:6px}
+        .result-hero .lucky-subtitle{font-size:14px;color:rgba(255,215,0,.8)}
+
+        .result-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:22px;margin-bottom:14px;backdrop-filter:blur(10px)}
+        .result-card h3{font-size:15px;color:#ffd700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+        .result-card p,.result-card li{font-size:14px;color:rgba(255,255,255,.75);line-height:1.8}
+
+        .fortune-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+        .fortune-item{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:14px;text-align:center}
+        .fortune-item .fi-icon{font-size:26px;margin-bottom:6px}
+        .fortune-item .fi-label{font-size:11px;color:rgba(255,255,255,.45);margin-bottom:4px}
+        .fortune-item .fi-value{font-size:16px;font-weight:700;color:#ffd700}
+        .fortune-item .fi-desc{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}
+
+        .warning-box{background:rgba(255,80,80,.08);border:1px solid rgba(255,80,80,.2);border-radius:14px;padding:16px;margin-bottom:14px}
+        .warning-box h3{color:#ff6b6b;font-size:14px;margin-bottom:8px}
+        .warning-box p{font-size:13px;color:rgba(255,255,255,.65);line-height:1.7}
+
+        .lucky-items{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+        .lucky-tag{background:rgba(255,215,0,.1);border:1px solid rgba(255,215,0,.25);color:#ffd700;padding:6px 14px;border-radius:20px;font-size:13px}
+
+        /* ===== 付费墙 ===== */
+        .paywall{display:none;text-align:center;background:linear-gradient(135deg,rgba(255,215,0,.08),rgba(139,92,246,.08));border:1.5px solid rgba(255,215,0,.2);border-radius:20px;padding:28px 22px;margin-top:20px}
+        .paywall .lock-icon{font-size:44px;margin-bottom:12px}
+        .paywall h3{font-size:18px;margin-bottom:6px}
+        .paywall .pw-sub{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:16px}
+        .paywall .price{font-size:34px;color:#ffd700;font-weight:800;margin:12px 0}
+        .paywall .price .unit{font-size:14px;color:rgba(255,255,255,.4);font-weight:400}
+        .paywall .features{text-align:left;margin:18px 0;padding:0 8px}
+        .paywall .features li{list-style:none;padding:7px 0;font-size:14px;color:rgba(255,255,255,.7)}
+        .paywall .features li::before{content:"✨ "}
+        .btn-pay{background:linear-gradient(135deg,#ffd700,#ff8c00);color:#1a1a2e;border:none;padding:15px 48px;border-radius:50px;font-size:17px;font-weight:700;cursor:pointer;width:100%;letter-spacing:1px;transition:all .3s}
+        .btn-pay:active{transform:scale(.96)}
+
+        /* ===== 解锁后完整报告 ===== */
+        .full-report{display:none}
+        .full-report .detail-section{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:18px;margin-bottom:12px}
+        .full-report .detail-section h4{font-size:14px;color:#ffd700;margin-bottom:8px}
+        .full-report .detail-section p{font-size:13px;color:rgba(255,255,255,.7);line-height:1.8}
+
+        .share-section{text-align:center;margin-top:24px;padding-bottom:40px}
+        .btn-share{background:linear-gradient(135deg,#ffd700,#ffaa00);color:#1a1a2e;border:none;padding:13px 36px;border-radius:50px;font-size:15px;font-weight:600;cursor:pointer;margin:6px}
+        .btn-retry{background:transparent;color:rgba(255,255,255,.6);border:1.5px solid rgba(255,255,255,.2);padding:12px 32px;border-radius:50px;font-size:14px;cursor:pointer;margin:6px}
+
+        @keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+        @keyframes slideIn{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}
+    </style>
+</head>
+<body>
+
+<!-- 星空背景 -->
+<div class="stars" id="stars"></div>
+
+<div class="container">
+
+    <!-- ===== 首页 ===== -->
+    <div class="start-page" id="startPage">
+        <div class="main-emoji">💫</div>
+        <h1>测测你未来3个月的<br>幸运数字是什么</h1>
+        <p class="subtitle">你的运势密码藏在这些数字里<br>答 <span>5道题</span>，解锁你的专属运势报告</p>
+        <div class="preview-cards">
+            <div class="preview-card">
+                <div class="pc-icon">📅</div>
+                <div class="pc-title">每日运势</div>
+                <div class="pc-desc">未来3个月每日运势走向</div>
+            </div>
+            <div class="preview-card">
+                <div class="pc-icon">💕</div>
+                <div class="pc-title">桃花指数</div>
+                <div class="pc-desc">正缘方位&恋爱运势</div>
+            </div>
+            <div class="preview-card">
+                <div class="pc-icon">💰</div>
+                <div class="pc-title">财运走势</div>
+                <div class="pc-desc">财富机遇&投资提醒</div>
+            </div>
+            <div class="preview-card">
+                <div class="pc-icon">⚡</div>
+                <div class="pc-title">注意日提醒</div>
+                <div class="pc-desc">需要特别小心的日子</div>
+            </div>
+        </div>
+        <p class="stats">已有 <strong>28,536</strong> 人测试</p>
+        <button class="btn-start" onclick="startTest()">开始测试 💫</button>
+    </div>
+
+    <!-- ===== 答题页 ===== -->
+    <div class="question-page" id="questionPage">
+        <div class="progress-bar"><div class="fill" id="progressFill" style="width:0%"></div></div>
+        <p class="question-num" id="questionNum">第 1/5 题</p>
+        <h2 class="question-text" id="questionText"></h2>
+        <div class="options" id="optionsContainer"></div>
+    </div>
+
+    <!-- ===== 分析动画页 ===== -->
+    <div class="analyzing-page" id="analyzingPage">
+        <div class="orb-container"><div class="orb"></div></div>
+        <p class="step-text" id="analyzeStep">正在连接星象能量...</p>
+        <p class="step-sub" id="analyzeSub">请稍候</p>
+    </div>
+
+    <!-- ===== 结果页 ===== -->
+    <div class="result-page" id="resultPage">
+        <div class="result-hero">
+            <div class="lucky-label">你的幸运数字</div>
+            <div class="lucky-number" id="luckyNumber">7</div>
+            <div class="lucky-title" id="luckyTitle">星光引路数</div>
+            <div class="lucky-subtitle" id="luckySubtitle">未来3个月，这个数字将为你带来好运</div>
+        </div>
+
+        <!-- 四宫格运势总览 -->
+        <div class="fortune-grid" id="fortuneGrid">
+            <div class="fortune-item">
+                <div class="fi-icon">💕</div>
+                <div class="fi-label">桃花指数</div>
+                <div class="fi-value" id="loveScore">85分</div>
+                <div class="fi-desc" id="loveHint">正缘即将出现</div>
+            </div>
+            <div class="fortune-item">
+                <div class="fi-icon">💰</div>
+                <div class="fi-label">财运指数</div>
+                <div class="fi-value" id="wealthScore">78分</div>
+                <div class="fi-desc" id="wealthHint">偏财运旺盛</div>
+            </div>
+            <div class="fortune-item">
+                <div class="fi-icon">🌟</div>
+                <div class="fi-label">事业指数</div>
+                <div class="fi-value" id="careerScore">90分</div>
+                <div class="fi-desc" id="careerHint">贵人运爆棚</div>
+            </div>
+            <div class="fortune-item">
+                <div class="fi-icon">🧘</div>
+                <div class="fi-label">健康指数</div>
+                <div class="fi-value" id="healthScore">82分</div>
+                <div class="fi-desc" id="healthHint">注意作息规律</div>
+            </div>
+        </div>
+
+        <!-- 幸运标签 -->
+        <div class="lucky-items" id="luckyItems">
+            <span class="lucky-tag">🍀 幸运色：薄荷绿</span>
+            <span class="lucky-tag">🧭 贵人方位：东南</span>
+            <span class="lucky-tag">📅 旺运日：每周三</span>
+        </div>
+
+        <!-- 运势概述 -->
+        <div class="result-card" id="fortuneSummary">
+            <h3>🔮 未来3个月运势总览</h3>
+            <p id="summaryText"></p>
+        </div>
+
+        <!-- 注意事项 -->
+        <div class="warning-box" id="warningBox">
+            <h3>⚠️ 需要注意的日子</h3>
+            <p id="warningText"></p>
+        </div>
+
+        <!-- 付费墙 -->
+        <div class="paywall" id="paywall">
+            <div class="lock-icon">🔐</div>
+            <h3>解锁完整运势报告</h3>
+            <p class="pw-sub">查看你的每日运势、正缘详解和财运分析</p>
+            <p class="price">¥<span id="priceValue">5.9</span> <span class="unit">永久查看</span></p>
+            <ul class="features">
+                <li>📅 未来3个月每日运势详情</li>
+                <li>💕 正缘特征 & 桃花方位详解</li>
+                <li>💰 财运走势 & 最佳投资时机</li>
+                <li>⚡ 避坑日历 & 化解方法</li>
+                <li>🧿 专属幸运符 & 开运建议</li>
+            </ul>
+            <button class="btn-pay" onclick="handlePay()">立即解锁 🔓</button>
+        </div>
+
+        <!-- 解锁后完整报告 -->
+        <div class="full-report" id="fullReport">
+            <div class="detail-section">
+                <h4>📅 每日运势精华</h4>
+                <p id="dailyFortune"></p>
+            </div>
+            <div class="detail-section">
+                <h4>💕 正缘详解</h4>
+                <p id="loveDetail"></p>
+            </div>
+            <div class="detail-section">
+                <h4>💰 财运分析</h4>
+                <p id="wealthDetail"></p>
+            </div>
+            <div class="detail-section">
+                <h4>🧿 专属开运建议</h4>
+                <p id="luckyAdvice"></p>
+            </div>
+        </div>
+
+        <div class="share-section">
+            <button class="btn-share" onclick="shareResult()">分享给朋友 📤</button>
+            <button class="btn-retry" onclick="retryTest()">再测一次</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+// ===== 可配置项 =====
+const CONFIG = {
+    title: "测测你未来3个月的幸运数字是什么💫",
+    price: "5.9",
+    // 替换成你的真实付费链接，目前点击可直接预览完整报告
+    payUrl: "https://your-payment-link.com/pay",
+
+    questions: [
+        {
+            text: "走进一片森林，你最先注意到什么？",
+            options: [
+                { text: "🌲 一棵巨大的古树", scores: {nature:3, fire:1, water:1, air:1} },
+                { text: "🔥 远处的篝火光芒", scores: {nature:1, fire:3, water:1, air:1} },
+                { text: "🌊 旁边流淌的小溪", scores: {nature:1, fire:1, water:3, air:1} },
+                { text: "🦅 天空盘旋的飞鸟", scores: {nature:1, fire:1, water:1, air:3} }
+            ]
+        },
+        {
+            text: "深夜醒来，你看到窗外是什么景象？",
+            options: [
+                { text: "🌙 一轮满月洒下银光", scores: {nature:1, fire:1, water:3, air:1} },
+                { text: "☄️ 一颗流星划过天际", scores: {nature:1, fire:3, water:1, air:1} },
+                { text: "🌌 璀璨的星河", scores: {nature:1, fire:1, water:1, air:3} },
+                { text: "🌿 摇曳的树影", scores: {nature:3, fire:1, water:1, air:1} }
+            ]
+        },
+        {
+            text: "选一张你最有感觉的塔罗牌？",
+            options: [
+                { text: "🌟 命运之轮 — 转变将至", scores: {nature:1, fire:3, water:1, air:1} },
+                { text: "🌙 月亮 — 直觉引导", scores: {nature:1, fire:1, water:3, air:1} },
+                { text: "⚡ 雷电 — 突破力量", scores: {nature:1, fire:1, water:1, air:3} },
+                { text: "🌍 世界 — 圆满丰收", scores: {nature:3, fire:1, water:1, air:1} }
+            ]
+        },
+        {
+            text: "如果能拥有一种神秘力量，你选？",
+            options: [
+                { text: "🌊 预知未来", scores: {nature:1, fire:1, water:3, air:1} },
+                { text: "🔥 点石成金", scores: {nature:1, fire:3, water:1, air:1} },
+                { text: "🌿 万物沟通", scores: {nature:3, fire:1, water:1, air:1} },
+                { text: "⚡ 瞬间移动", scores: {nature:1, fire:1, water:1, air:3} }
+            ]
+        },
+        {
+            text: "你觉得自己最像哪种自然现象？",
+            options: [
+                { text: "🌋 火山 — 内心藏着巨大能量", scores: {nature:1, fire:3, water:1, air:1} },
+                { text: "🌊 海洋 — 深邃且包容", scores: {nature:1, fire:1, water:3, air:1} },
+                { text: "🌪️ 风暴 — 自由不受拘束", scores: {nature:1, fire:1, water:1, air:3} },
+                { text: "🏔️ 高山 — 沉稳且坚定", scores: {nature:3, fire:1, water:1, air:1} }
+            ]
+        }
+    ],
+
+    results: {
+        nature: {
+            luckyNumber: 6,
+            luckyTitle: "大地守护数",
+            luckySubtitle: "稳固的力量将为你铺就坦途",
+            loveScore: 82, loveHint: "身边人可能就是正缘",
+            wealthScore: 88, wealthHint: "稳中有升，适合长线",
+            careerScore: 91, careerHint: "贵人运旺盛",
+            healthScore: 85, healthHint: "体力充沛，注意肠胃",
+            luckyColor: "森林绿", luckyDir: "东北", luckyDay: "每周五",
+            summary: "未来3个月，你将迎来一段稳扎稳打的上升期。你的守护数字 6 象征着和谐与丰收，大地能量将赋予你超强的执行力和耐力。7月中旬会迎来一个重要转机，这个改变会让你的生活轨迹更加清晰。事业上的贵人已经出现在你的社交圈中，注意那些年长或资历深的人给你的建议。",
+            warning: "⚠️ 8月3日-8月7日：这段时间容易因冲动消费而破财，建议克制购物欲望。\n⚠️ 7月21日前后：工作压力较大，注意休息，不要硬撑。",
+            dailyFortune: "7月上旬：运势稳步上升，适合推进重要项目。工作中会得到上级认可，私下也有贵人主动帮忙。中旬是社交高峰期，多参加聚会会带来意外惊喜。\n\n7月下旬-8月上旬：财运渐旺，可能收到延迟已久的款项或加薪消息。感情上，单身者会在日常场景中遇到心动的人——可能是同事或朋友介绍。\n\n8月中旬-9月：整体运势达到高峰。这个阶段你做出的决定往往是对的，勇敢迈出那一步。9月初有一个财富机遇，把握住会有可观回报。",
+            loveDetail: "你的正缘特征：身材偏高大/匀称，性格温和但有主见，可能在教育、医疗或金融行业工作。对方会在7月底到8月中旬出现，场景多为工作相关或朋友聚会。已有伴侣的人，8月是感情升温的关键期，一次短途旅行能让彼此更加亲密。幸运方位：东北方向。",
+            wealthDetail: "财运整体趋势：先稳后涨。7月适合守财和规划，不要冲动投资；8月偏财运开启，可能收到意外之财（奖金、红包、二手交易获利）；9月是最佳投资窗口期，如果你一直在考虑某个理财计划，9月上旬行动最合适。注意：远离高风险投机，你的财路在稳健中求增长。",
+            luckyAdvice: "🧿 随身携带一枚硬币（面值不限），作为你的幸运符，它象征财富的循环流转。\n🌿 在家中东北方位放置一盆绿植，增强你的贵人运。\n👗 重要场合穿着森林绿或深棕色，能提升你的气场和运势。\n💡 每月6号、16号、26号是你的能量日，这些天做出的决定格外顺遂。"
+        },
+        fire: {
+            luckyNumber: 9,
+            luckyTitle: "烈焰破局数",
+            luckySubtitle: "燃烧的勇气将为你打开新世界",
+            loveScore: 88, loveHint: "热情吸引桃花，注意甄别",
+            wealthScore: 79, wealthHint: "有偏财运但需谨慎",
+            careerScore: 93, careerHint: "升职加薪在望",
+            healthScore: 76, healthHint: "注意上火和睡眠",
+            luckyColor: "烈焰红", luckyDir: "正南", luckyDay: "每周二",
+            summary: "未来3个月，你的能量如火山般蓄势待发！守护数字 9 象征着突破与蜕变，这段时间你将迎来一次命运级别的转变。7月就会有征兆出现——一个你期待已久的机会终于浮出水面。不要犹豫，冲就对了！你的人气和影响力在这段时间会大幅攀升，适合做任何需要曝光和表现的事情。",
+            warning: "⚠️ 7月15日-7月18日：容易与人发生争执，遇事冷静三秒再回应。\n⚠️ 8月22日前后：注意行车安全，避免疲劳驾驶。\n⚠️ 9月初：身体可能发出警报信号，不要忽视小症状。",
+            dailyFortune: "7月上旬：能量爆棚的时期！你的行动力和决断力达到巅峰，适合启动新项目、面试新工作或表白。中旬可能遇到小挫折，但这是对你决心的考验，坚持过去就是坦途。\n\n8月：社交运大爆发！你会成为人群中的焦点，各种邀约纷至沓来。其中至少有一个邀约会带来事业或感情上的重要机遇。下旬偏财运显现，可能收到意外收入。\n\n9月：收穫的季节来了。前期播下的种子开始结果，无论是工作还是感情，你都会看到明显的进展。9月中旬有一个重要的契约或承诺，仔细审视后大胆签下。",
+            loveDetail: "你的正缘特征：性格热情开朗，笑容很有感染力，可能在创意、传媒或互联网行业。对方会在8月通过社交场合出现——注意那些第一次见面就让你心跳加速的人。已有伴侣的人，7月下旬可能经历一次考验，但挺过去后感情会更深厚。幸运方位：正南方向。",
+            wealthDetail: "财运整体趋势：大胆中有机会。7月是你为财富打基础的时期，不适合冒进；8月偏财运极佳，可能通过副业、创意变现或社交获得收入；9月中旬有一个大额收入的机会，可能与签约或合作有关。但注意：不要借钱给别人，也不要做担保，这会扰乱你的财运磁场。",
+            luckyAdvice: "🧿 佩戴红色或橙色的饰品（手链、手机壳均可），增强你的火元素能量。\n🕯️ 每周二晚上点燃一支蜡烛冥想5分钟，清理负面能量。\n👗 重要场合穿着红色系或暖色调，能大幅提升你的气场。\n💡 每月9号、19号、29号是你的幸运日，适合做重要决定。"
+        },
+        water: {
+            luckyNumber: 2,
+            luckyTitle: "灵水映照数",
+            luckySubtitle: "直觉的力量将引领你找到答案",
+            loveScore: 92, loveHint: "正缘强烈，感情高光期",
+            wealthScore: 83, wealthHint: "灵感变现实的好时机",
+            careerScore: 86, careerHint: "创意灵感爆发",
+            healthScore: 79, wealthHint: "注意情绪波动",
+            luckyColor: "月光银", luckyDir: "正西", luckyDay: "每周一",
+            summary: "未来3个月，你的直觉将达到前所未有的敏锐度！守护数字 2 象征着双倍好运和深度连接，你的第六感在这段时间几乎不会出错。7月会收到一个与水相关的消息（可能是旅行、搬迁或与新人的相遇），这将成为下半年运势的转折点。感情是你这段时间最大的亮点，无论是单身还是恋爱中，都会有令人心动的进展。",
+            warning: "⚠️ 7月28日-8月1日：情绪容易低落，给自己独处充电的时间，不要勉强社交。\n⚠️ 8月15日前后：财务上有人可能向你借钱，婉拒为佳。\n⚠️ 9月10日左右：注意水边安全，游泳或水上活动要谨慎。",
+            dailyFortune: "7月：直觉力最强的月份。你对人和事的判断几乎百发百中，信任你的第六感。工作上，一个创意方案会让你脱颖而出。感情上，单身者会感受到强烈的桃花信号，可能在出行或与水相关的场景中遇见心动的人。\n\n8月：感情的高光时刻！无论单身还是有伴侣，这个月都充满了甜蜜和浪漫。财运也随感情运走高，可能通过人际关系获得赚钱机会。下旬有一次短途旅行的机会，去吧，会带来好运。\n\n9月：事业运上升，你的创意和洞察力会被重要人物注意到。这可能带来升职、加薪或新的合作机会。月底财运达到高峰，一笔预期外的收入即将到账。",
+            loveDetail: "你的正缘特征：眼神温柔但坚定，气质偏文艺或知性，可能在艺术、写作或心理咨询领域。对方会在7月底到8月中旬通过文化、旅行或朋友介绍出现。你会对ta有一种似曾相识的感觉，这就是你的直觉在确认。已有伴侣的人，8月是浪漫巅峰，一次旅行或共同体验能让感情升华。幸运方位：正西方向。",
+            wealthDetail: "财运整体趋势：灵感即财富。你的创意和想法在未来3个月有极强的变现能力，不要只停留在想，要行动。7月适合规划和积蓄；8月是最佳行动期，你的副业或创意项目开始产生收入；9月有一笔与水相关的财运——可能是旅游行业、饮品或与远方有关的收入。投资方面，9月中旬前避免大额投入。",
+            luckyAdvice: "🧿 随身携带一颗白色或透明的小石头（水晶最佳），作为你的灵水幸运石。\n💧 每天早上喝一杯温水，想象它带来一天的清爽能量。\n👗 重要场合穿着银色、白色或浅蓝色，增强你的灵性磁场。\n💡 每月2号、12号、22号是你的能量日，直觉力最强，适合做重要选择。"
+        },
+        air: {
+            luckyNumber: 3,
+            luckyTitle: "疾风引航数",
+            luckySubtitle: "自由的力量将带你飞向更高处",
+            loveScore: 78, loveHint: "先提升自己，桃花自来",
+            wealthScore: 90, wealthHint: "多个渠道同时进财",
+            careerScore: 87, careerHint: "跨界机会出现",
+            healthScore: 81, healthHint: "注意呼吸系统",
+            luckyColor: "天际蓝", luckyDir: "西北", luckyDay: "每周四",
+            summary: "未来3个月，你的世界将变得无比宽广！守护数字 3 象征着多元与拓展，你会在不同领域发现新机遇。7月会有一个意想不到的跨界合作或学习机会，打开你的视野；8月是你财运最旺的月份，多个收入渠道同时开启；9月社交圈大扩张，认识的人脉将在年底带来回报。整体来说，这是一段需要你保持开放心态、勇于尝试的时期。",
+            warning: "⚠️ 8月8日-8月12日：行程可能出现变动，重要事务请提前确认。\n⚠️ 9月1日前后：合同或协议细节需反复核实，避免遗漏条款。\n⚠️ 7月底：注意感冒和呼吸道问题，出门备件外套。",
+            dailyFortune: "7月：视野开阔期。你会接触到全新的领域或人群，这些新鲜的刺激会让你的思维更加活跃。工作中的跨界合作提案值得认真考虑，它会成为下半年最大的亮点。月底可能有一趟说走就走的出行，去吧。\n\n8月：财运黄金月！收入渠道多元化是关键词——本职、副业、投资、意外之财可能同时出现。8月中旬是收入高峰，一笔较大的进账让你惊喜。社交上，一次聚会或活动中的对话会给你带来关键启发。\n\n9月：人脉变现期。前期认识的人开始为你带来实际收益，可能是合作机会、资源对接或信息差带来的红利。下旬有一个重要的社交场合，务必出席，贵人在其中。",
+            loveDetail: "你的正缘特征：思维敏捷、谈吐幽默，可能在科技、航空或自媒体领域。对方会在出行、培训或线上社群中出现，时间多在8月。你们会因为某个共同话题而一拍即合。已有伴侣的人，9月适合一起规划未来，一次深入的沟通能让关系更加紧密。幸运方位：西北方向。",
+            wealthDetail: "财运整体趋势：多元化收获。7月虽不是收入高峰，但播种的种子会在8月开花——这个月收入可能翻倍；9月趋于平稳但质量更高，入账更加持续。关键策略：不要把鸡蛋放在一个篮子里，8月获得的多个渠道要同时维护。投资方面，8月中旬可适当增加投入，但9月起要收紧，落袋为安。",
+            luckyAdvice: "🧿 在办公桌或书桌上放一个风铃，风的响动能为你带来消息和灵感。\n🌬️ 每天开窗通风5分钟，让新鲜气流带走沉闷能量。\n👗 重要场合穿着天蓝色或银灰色，强化你的气场和表达能力。\n💡 每月3号、13号、23号是你的超级幸运日，适合谈判、签约和重要社交。"
+        }
+    }
+};
+
+// ===== 星空背景 =====
+(function(){
+    const c=document.getElementById('stars');
+    for(let i=0;i<80;i++){
+        const s=document.createElement('div');
+        s.className='star';
+        const size=Math.random()*2+1;
+        s.style.cssText=`width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--dur:${Math.random()*3+2}s;animation-delay:${Math.random()*3}s`;
+        c.appendChild(s);
+    }
+})();
+
+// ===== 核心逻辑 =====
+let currentQuestion = 0;
+let scores = {nature:0, fire:0, water:0, air:0};
+
+function startTest(){
+    document.getElementById('startPage').style.display='none';
+    document.getElementById('questionPage').style.display='block';
+    currentQuestion=0;
+    scores={nature:0,fire:0,water:0,air:0};
+    showQuestion();
+}
+
+function showQuestion(){
+    const q=CONFIG.questions[currentQuestion];
+    const total=CONFIG.questions.length;
+    document.getElementById('progressFill').style.width=(currentQuestion/total*100)+'%';
+    document.getElementById('questionNum').textContent='第 '+(currentQuestion+1)+'/'+total+' 题';
+    document.getElementById('questionText').textContent=q.text;
+    const c=document.getElementById('optionsContainer');
+    c.innerHTML='';
+    q.options.forEach(o=>{
+        const b=document.createElement('button');
+        b.className='option';
+        b.textContent=o.text;
+        b.onclick=()=>selectOption(b, o.scores);
+        c.appendChild(b);
+    });
+}
+
+function selectOption(btn, s){
+    // 高亮选中
+    document.querySelectorAll('.option').forEach(o=>o.classList.remove('selected'));
+    btn.classList.add('selected');
+    // 累加分数
+    for(const[k,v]of Object.entries(s)) scores[k]=(scores[k]||0)+v;
+    currentQuestion++;
+    if(currentQuestion<CONFIG.questions.length){
+        setTimeout(()=>{
+            const p=document.getElementById('questionPage');
+            p.style.animation='none';
+            p.offsetHeight;
+            p.style.animation='slideIn .5s ease';
+            showQuestion();
+        }, 350);
+    } else {
+        // 进入分析动画
+        document.getElementById('questionPage').style.display='none';
+        document.getElementById('analyzingPage').style.display='block';
+        runAnalyzeAnimation();
+    }
+}
+
+function runAnalyzeAnimation(){
+    const steps=[
+        {text:"正在解读你的星象密码...", sub:"连接宇宙能量中"},
+        {text:"分析你的元素属性...", sub:"计算中"},
+        {text:"正在生成专属运势报告...", sub:"即将完成"},
+    ];
+    let i=0;
+    const iv=setInterval(()=>{
+        if(i<steps.length){
+            document.getElementById('analyzeStep').textContent=steps[i].text;
+            document.getElementById('analyzeSub').textContent=steps[i].sub;
+            i++;
+        } else {
+            clearInterval(iv);
+            showResult();
+        }
+    }, 900);
+}
+
+function showResult(){
+    document.getElementById('analyzingPage').style.display='none';
+    document.getElementById('resultPage').style.display='block';
+
+    // 找出主导元素
+    const maxType=Object.entries(scores).reduce((a,b)=>a[1]>b[1]?a:b)[0];
+    const r=CONFIG.results[maxType];
+
+    // 填充结果
+    document.getElementById('luckyNumber').textContent=r.luckyNumber;
+    document.getElementById('luckyTitle').textContent=r.luckyTitle;
+    document.getElementById('luckySubtitle').textContent=r.luckySubtitle;
+
+    document.getElementById('loveScore').textContent=r.loveScore+'分';
+    document.getElementById('loveHint').textContent=r.loveHint;
+    document.getElementById('wealthScore').textContent=r.wealthScore+'分';
+    document.getElementById('wealthHint').textContent=r.wealthHint;
+    document.getElementById('careerScore').textContent=r.careerScore+'分';
+    document.getElementById('careerHint').textContent=r.careerHint;
+    document.getElementById('healthScore').textContent=r.healthScore+'分';
+    document.getElementById('healthHint').textContent=r.healthHint;
+
+    document.getElementById('luckyItems').innerHTML=
+        `<span class="lucky-tag">🍀 幸运色：${r.luckyColor}</span>`+
+        `<span class="lucky-tag">🧭 贵人方位：${r.luckyDir}</span>`+
+        `<span class="lucky-tag">📅 旺运日：${r.luckyDay}</span>`;
+
+    document.getElementById('summaryText').textContent=r.summary;
+    document.getElementById('warningText').innerHTML=r.warning.replace(/\n/g,'<br>');
+
+    document.getElementById('priceValue').textContent=CONFIG.price;
+
+    // 完整报告内容（付费后显示）
+    document.getElementById('dailyFortune').textContent=r.dailyFortune;
+    document.getElementById('loveDetail').textContent=r.loveDetail;
+    document.getElementById('wealthDetail').textContent=r.wealthDetail;
+    document.getElementById('luckyAdvice').innerHTML=r.luckyAdvice.replace(/\n/g,'<br>');
+}
+
+function handlePay(){
+    if(CONFIG.payUrl==="https://your-payment-link.com/pay"){
+        // 未配置付费链接时，直接解锁预览
+        unlockResult();
+    } else {
+        window.open(CONFIG.payUrl,'_blank');
+    }
+}
+
+function unlockResult(){
+    document.getElementById('paywall').style.display='none';
+    document.getElementById('fullReport').style.display='block';
+}
+
+function shareResult(){
+    const maxType=Object.entries(scores).reduce((a,b)=>a[1]>b[1]?a:b)[0];
+    const r=CONFIG.results[maxType];
+    const t='我在「'+CONFIG.title+'」中抽到了幸运数字 '+r.luckyNumber+' —— '+r.luckyTitle+'！你也来试试吧💫';
+    if(navigator.share){
+        navigator.share({title:CONFIG.title,text:t,url:window.location.href});
+    } else {
+        navigator.clipboard.writeText(t+'\n'+window.location.href)
+            .then(()=>alert('已复制分享文案！'))
+            .catch(()=>alert(t));
+    }
+}
+
+function retryTest(){
+    document.getElementById('resultPage').style.display='none';
+    document.getElementById('fullReport').style.display='none';
+    document.getElementById('paywall').style.display='block';
+    document.getElementById('startPage').style.display='block';
+    currentQuestion=0;
+    scores={nature:0,fire:0,water:0,air:0};
+}
+</script>
+</body>
+</html>
